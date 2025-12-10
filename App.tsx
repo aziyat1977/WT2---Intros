@@ -1,10 +1,13 @@
+
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   ArrowRight, X, Lock, Unlock, CheckCircle2, 
-  BrainCircuit, Trophy, Star, Moon, Sun, Globe
+  BrainCircuit, Trophy, Star, Moon, Sun, Loader2,
+  MapPin, Flag, AlertTriangle, Crosshair, PenTool, Medal
 } from 'lucide-react';
 import { STATIC_TOPICS, UI_LABELS } from './constants';
-import { StaticTopic, Slide, SlideTheme, UserProgress, Language } from './types';
+import { StaticTopic, Slide, SlideTheme, UserProgress, Language, Milestone } from './types';
+import { generateVisualAid } from './services/geminiService';
 
 // --- UTILS ---
 
@@ -42,9 +45,26 @@ const Reveal: React.FC<{ children: React.ReactNode, delay?: number }> = ({ child
   );
 };
 
+// --- MILESTONE DEFINITIONS ---
+const LESSON_MILESTONES: Milestone[] = [
+  { id: 'briefing', label: 'Briefing' },
+  { id: 'trap', label: 'The Trap' },
+  { id: 'logic', label: 'Logic Core' },
+  { id: 'synthesis', label: 'Synthesis' },
+  { id: 'mastery', label: 'Mastery' }
+];
+
 // --- TRANSLATION HELPER ---
 const getTranslatedLine = (text: string, lang: Language, topic: StaticTopic): string => {
   if (lang === 'en') return text;
+  
+  // Milestone labels fallback
+  const milestones: Record<string, string> = lang === 'ru' 
+    ? { "Briefing": "Брифинг", "The Trap": "Ловушка", "Logic Core": "Логика", "Synthesis": "Синтез", "Mastery": "Мастерство" }
+    : { "Briefing": "Brifing", "The Trap": "Tuzoq", "Logic Core": "Mantiq", "Synthesis": "Sintez", "Mastery": "Mahorat" };
+    
+  if (milestones[text]) return milestones[text];
+
   // Try to find exact line match
   const transMap = lang === 'ru' ? topic.translations?.ru?.lines : topic.translations?.uz?.lines;
   if (transMap && transMap[text]) return transMap[text];
@@ -68,59 +88,116 @@ const getTranslatedLine = (text: string, lang: Language, topic: StaticTopic): st
 const generateJourney = (topic: StaticTopic): Slide[] => {
   const slides: Slide[] = [];
   let id = 0;
-  const add = (s: Partial<Slide>) => slides.push({ id: `s-${id++}`, type: 'text', theme: 'neutral', lines: [], ...s } as Slide);
-
-  // 1. Cover
-  add({ type: 'cover', theme: 'neutral', overline: "Module 0" + topic.id, title: topic.topicTitle, lines: ["The Invisible Work", "2025 Edition"] });
-
-  // 2. The Task
-  add({ theme: 'neutral', overline: "The Task", title: "Analyze Prompt", lines: [topic.prompt] });
-
-  // 3. The Trap
-  add({ theme: 'trap', overline: "Warning", title: "The Trap", lines: ["Most students write:", `"${topic.theTrap}"`, "This limits you to Band 6.0."] });
   
-  // >> QUIZ: TRAP <<
-  if (topic.practice) add({ type: 'interactive', theme: 'trap', title: "Check: The Trap", data: { type: 'quiz', ...topic.practice.trap } });
+  // Helper to add slides with auto-incrementing IDs
+  const add = (s: Omit<Slide, 'id'>) => slides.push({ id: `s-${id++}`, ...s });
 
-  // 4. The Shift
-  add({ theme: 'logic', overline: "The Shift", title: "Invisible Work", lines: ["Stop writing.", "Start thinking.", "Find the specific question."] });
+  // --- MILESTONE 1: BRIEFING ---
+  add({ type: 'cover', theme: 'neutral', milestoneId: 'briefing', overline: "Module 0" + topic.id, title: topic.topicTitle, lines: ["The Invisible Work", "2025 Edition"] });
+  add({ type: 'text', theme: 'neutral', milestoneId: 'briefing', overline: "The Task", title: "Analyze Prompt", lines: [topic.prompt] });
 
-  // 5. Specific Question
-  add({ theme: 'logic', overline: "Precision", title: "Specific Question", lines: [topic.specificQuestion] });
+  // Checkpoint Transition
+  add({ type: 'checkpoint', theme: 'trap', milestoneId: 'trap', title: "Checkpoint Reached", lines: ["Enter Danger Zone"] });
 
-  // 6. Logic Map A/B/Pos
-  add({ theme: 'logic', overline: "Logic Map", title: "View A", lines: [topic.logicMap.viewA] });
-  add({ theme: 'logic', overline: "Logic Map", title: "View B", lines: [topic.logicMap.viewB] });
-  add({ theme: 'logic', overline: "Critical Thinking", title: "My Position", lines: [topic.logicMap.position] });
+  // --- MILESTONE 2: THE TRAP ---
+  add({ type: 'text', theme: 'trap', milestoneId: 'trap', overline: "Warning", title: "The Trap", lines: ["Most students write:", `"${topic.theTrap}"`, "This limits you to Band 6.0."] });
+  if (topic.practice) add({ type: 'interactive', theme: 'trap', milestoneId: 'trap', title: "Check: The Trap", data: { type: 'quiz', ...topic.practice.trap }, lines: [] });
 
-  // >> QUIZ: LOGIC <<
-  if (topic.practice) add({ type: 'interactive', theme: 'logic', title: "Check: Logic", data: { type: 'quiz', ...topic.practice.logic } });
+  // Checkpoint Transition
+  add({ type: 'checkpoint', theme: 'logic', milestoneId: 'logic', title: "Checkpoint Reached", lines: ["Activate Logic Core"] });
 
-  // 7. Intro
+  // --- MILESTONE 3: LOGIC CORE ---
+  add({ type: 'text', theme: 'logic', milestoneId: 'logic', overline: "The Shift", title: "Invisible Work", lines: ["Stop writing.", "Start thinking.", "Find the specific question."] });
+  add({ type: 'text', theme: 'logic', milestoneId: 'logic', overline: "Precision", title: "Specific Question", lines: [topic.specificQuestion] });
+  add({ type: 'text', theme: 'logic', milestoneId: 'logic', overline: "Logic Map", title: "View A", lines: [topic.logicMap.viewA] });
+  add({ type: 'text', theme: 'logic', milestoneId: 'logic', overline: "Logic Map", title: "View B", lines: [topic.logicMap.viewB] });
+  add({ type: 'text', theme: 'logic', milestoneId: 'logic', overline: "Critical Thinking", title: "My Position", lines: [topic.logicMap.position] });
+  if (topic.practice) add({ type: 'interactive', theme: 'logic', milestoneId: 'logic', title: "Check: Logic", data: { type: 'quiz', ...topic.practice.logic }, lines: [] });
+
+  // Checkpoint Transition
+  add({ type: 'checkpoint', theme: 'neutral', milestoneId: 'synthesis', title: "Checkpoint Reached", lines: ["Begin Surgery"] });
+
+  // --- MILESTONE 4: SYNTHESIS ---
   const introSentences = topic.introduction.match(/[^.!?]+[.!?]+/g) || [topic.introduction];
   introSentences.forEach((sent, i) => {
-    add({ theme: 'neutral', overline: "Surgical Introduction", title: i === 0 ? "Thesis" : "Development", lines: [sent.trim()] });
+    add({ type: 'text', theme: 'neutral', milestoneId: 'synthesis', overline: "Surgical Introduction", title: i === 0 ? "Thesis" : "Development", lines: [sent.trim()] });
   });
 
-  // >> QUIZ: VOCAB / GAP <<
-  if (topic.practice) {
-    add({ type: 'interactive', theme: 'neutral', title: "Vocab Check", data: { type: 'quiz', ...topic.practice.vocab } });
-    add({ type: 'interactive', theme: 'neutral', title: "Gap Fill", data: { type: 'gap', ...topic.practice.gap } });
-  }
+  // Checkpoint Transition
+  add({ type: 'checkpoint', theme: 'success', milestoneId: 'mastery', title: "Final Check", lines: ["Prove Mastery"] });
 
-  // 8. Reward
-  add({ type: 'reward', theme: 'success', title: "Module Complete", lines: ["XP Gained: +100", "Next Level Unlocked"] });
+  // --- MILESTONE 5: MASTERY ---
+  if (topic.practice) {
+    add({ type: 'interactive', theme: 'neutral', milestoneId: 'mastery', title: "Vocab Check", data: { type: 'quiz', ...topic.practice.vocab }, lines: [] });
+    add({ type: 'interactive', theme: 'neutral', milestoneId: 'mastery', title: "Gap Fill", data: { type: 'gap', ...topic.practice.gap }, lines: [] });
+  }
+  add({ type: 'reward', theme: 'success', milestoneId: 'mastery', title: "Module Complete", lines: ["XP Gained: +100", "Next Level Unlocked"] });
 
   return slides;
 };
 
 // --- COMPONENTS ---
 
-const KineticText: React.FC<{ lines: string[], theme: SlideTheme, lang: Language, topic: StaticTopic }> = ({ lines, theme, lang, topic }) => {
-  const isDark = theme === 'trap' || theme === 'logic'; // These themes are always 'dark' background
-  
+const MilestoneTracker: React.FC<{ currentMilestoneId: string, lang: Language, topic: StaticTopic }> = ({ currentMilestoneId, lang, topic }) => {
+  const currentIndex = LESSON_MILESTONES.findIndex(m => m.id === currentMilestoneId);
+
+  const getIcon = (id: string) => {
+    switch(id) {
+      case 'briefing': return <MapPin size={14} />;
+      case 'trap': return <AlertTriangle size={14} />;
+      case 'logic': return <BrainCircuit size={14} />;
+      case 'synthesis': return <PenTool size={14} />;
+      case 'mastery': return <Medal size={14} />;
+      default: return <Flag size={14} />;
+    }
+  };
+
   return (
-    <div className="space-y-6 md:space-y-8 max-w-4xl w-full px-4 text-center md:text-left">
+    <div className="fixed left-4 md:left-8 top-1/2 -translate-y-1/2 z-50 hidden md:flex flex-col gap-1">
+      {LESSON_MILESTONES.map((m, i) => {
+        const isActive = m.id === currentMilestoneId;
+        const isPast = currentIndex > i;
+        
+        return (
+          <div key={m.id} className="flex items-center gap-4 group">
+             {/* Node */}
+             <div className="relative flex flex-col items-center">
+                {/* Connecting Line (Up) */}
+                {i > 0 && (
+                  <div className={`w-0.5 h-6 mb-1 transition-colors duration-500 ${isPast || isActive ? 'bg-cambridge' : 'bg-white/10'}`}></div>
+                )}
+                
+                {/* Dot */}
+                <div className={`
+                   w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all duration-500 relative
+                   ${isActive ? 'bg-cambridge border-cambridge text-white scale-110 shadow-[0_0_15px_rgba(0,240,255,0.5)]' : ''}
+                   ${isPast ? 'bg-ink border-cambridge text-cambridge' : ''}
+                   ${!isActive && !isPast ? 'bg-black/20 border-white/10 text-white/20' : ''}
+                `}>
+                   {isPast ? <CheckCircle2 size={14} /> : getIcon(m.id)}
+                   
+                   {/* Pulse Effect for Active */}
+                   {isActive && <div className="absolute inset-0 rounded-full bg-cambridge animate-ping opacity-30"></div>}
+                </div>
+             </div>
+
+             {/* Label */}
+             <div className={`
+                text-xs font-mono uppercase tracking-widest transition-all duration-500 self-end mb-2
+                ${isActive ? 'opacity-100 translate-x-0 text-white' : 'opacity-0 -translate-x-4'}
+             `}>
+               {getTranslatedLine(m.label, lang, topic)}
+             </div>
+          </div>
+        )
+      })}
+    </div>
+  );
+};
+
+const KineticText: React.FC<{ lines: string[], theme: SlideTheme, lang: Language, topic: StaticTopic }> = ({ lines, theme, lang, topic }) => {
+  return (
+    <div className="space-y-6 md:space-y-8 max-w-4xl w-full px-4 text-center md:text-left relative z-10">
       {lines.map((line, i) => {
         const text = getTranslatedLine(line, lang, topic);
         return (
@@ -142,17 +219,26 @@ const KineticText: React.FC<{ lines: string[], theme: SlideTheme, lang: Language
 
 const InteractiveModule: React.FC<{ data: any, onComplete: () => void, lang: Language }> = ({ data, onComplete, lang }) => {
   const [status, setStatus] = useState<'idle' | 'correct' | 'wrong'>('idle');
+  const [clickedOpt, setClickedOpt] = useState<string>('');
   
   const handleChoice = (opt: string) => {
     if (status === 'correct') return;
+    setClickedOpt(opt);
+
     if (data.type === 'quiz') {
        if (data.options.includes(opt)) {
          if (opt === data.answer) {
             setStatus('correct');
-            setTimeout(onComplete, 1500);
+            // If no explanation, auto advance. If explanation, wait for user.
+            if (!data.explanation) {
+              setTimeout(onComplete, 1500);
+            }
          } else {
             setStatus('wrong');
-            setTimeout(() => setStatus('idle'), 500);
+            setTimeout(() => {
+              setStatus('idle');
+              setClickedOpt('');
+            }, 500);
          }
        }
     }
@@ -162,7 +248,7 @@ const InteractiveModule: React.FC<{ data: any, onComplete: () => void, lang: Lan
 
   if (data.type === 'gap') {
       return (
-        <div className="w-full max-w-4xl animate-blur-in">
+        <div className="w-full max-w-4xl animate-blur-in relative z-10">
              <div className="bg-white/90 dark:bg-zinc-800/90 backdrop-blur-md p-8 md:p-10 rounded-3xl border border-cambridge/10 dark:border-white/10 shadow-2xl">
                 <p className="text-xl md:text-3xl font-serif leading-loose text-ink dark:text-gray-200 mb-10">
                     {data.textParts.map((part: string, i: number) => (
@@ -176,13 +262,19 @@ const InteractiveModule: React.FC<{ data: any, onComplete: () => void, lang: Lan
                         </span>
                     ))}
                 </p>
-                {status !== 'correct' && (
+                {status !== 'correct' ? (
                     <button 
                         onClick={() => { setStatus('correct'); setTimeout(onComplete, 2000); }}
                         className="w-full py-4 bg-ink dark:bg-zinc-950 text-white font-mono text-lg font-bold uppercase tracking-widest hover:bg-surgical transition-colors rounded-xl shadow-lg"
                     >
                         {labels.reveal}
                     </button>
+                ) : (
+                    <div className="text-center mt-6 animate-pop">
+                       <div className="inline-flex items-center gap-2 text-success font-bold font-mono">
+                          <CheckCircle2 size={24} /> {labels.correct}
+                       </div>
+                    </div>
                 )}
              </div>
         </div>
@@ -190,7 +282,7 @@ const InteractiveModule: React.FC<{ data: any, onComplete: () => void, lang: Lan
   }
 
   return (
-    <div className="w-full max-w-3xl animate-blur-in">
+    <div className="w-full max-w-3xl animate-blur-in relative z-10">
       <div className="mb-6 p-4 bg-white/50 dark:bg-zinc-800/50 rounded-xl backdrop-blur-sm">
          <h4 className="font-serif text-xl md:text-2xl font-bold text-ink dark:text-white text-center">{data.question}</h4>
       </div>
@@ -201,11 +293,11 @@ const InteractiveModule: React.FC<{ data: any, onComplete: () => void, lang: Lan
             onClick={() => handleChoice(opt)}
             className={`
               p-6 text-left rounded-2xl border-2 transition-all duration-300 transform hover:scale-[1.01]
-              ${status === 'wrong' ? 'animate-shake border-red-500 bg-red-50 dark:bg-red-900/30' : ''}
+              ${status === 'wrong' && clickedOpt === opt ? 'animate-shake border-red-500 bg-red-50 dark:bg-red-900/30' : ''}
               ${status === 'correct' && opt === data.answer ? 'border-success bg-success text-white scale-105 shadow-xl' : 'border-ink/5 dark:border-white/10 bg-white dark:bg-zinc-800 hover:border-ink dark:hover:border-white hover:shadow-lg dark:text-gray-200'}
             `}
           >
-            <span className="font-mono text-xs font-bold uppercase tracking-widest opacity-40 block mb-1">{labels.option} 0{i+1}</span>
+            <span className={`font-mono text-xs font-bold uppercase tracking-widest opacity-40 block mb-1 ${status === 'correct' && opt === data.answer ? 'text-white' : ''}`}>{labels.option} 0{i+1}</span>
             <span className="font-serif text-lg md:text-xl font-bold">{opt}</span>
           </button>
         ))}
@@ -215,18 +307,74 @@ const InteractiveModule: React.FC<{ data: any, onComplete: () => void, lang: Lan
             <div className="inline-flex items-center gap-2 bg-success text-white px-8 py-3 rounded-full font-mono font-bold text-lg shadow-lg">
                 <CheckCircle2 size={24} /> {labels.correct}
             </div>
+            {data.explanation && (
+                <div className="mt-6 p-6 bg-white/90 dark:bg-zinc-800/90 rounded-xl border-l-4 border-success text-left shadow-lg">
+                   <p className="font-sans text-ink dark:text-gray-200">
+                      <span className="font-bold text-success block mb-2 uppercase text-xs tracking-widest">Why?</span>
+                      {data.explanation}
+                   </p>
+                   <button 
+                      onClick={onComplete}
+                      className="mt-4 w-full py-3 bg-ink dark:bg-zinc-950 text-white rounded-lg font-mono text-sm uppercase font-bold hover:bg-zinc-700 transition-colors"
+                   >
+                     {labels.continue} <ArrowRight size={14} className="inline ml-1"/>
+                   </button>
+                </div>
+            )}
         </div>
       )}
     </div>
   );
 };
 
+const CheckpointSlide: React.FC<{ slide: Slide, onContinue: () => void }> = ({ slide, onContinue }) => {
+    useEffect(() => {
+        // Auto-advance after animation if user doesn't click
+        const timer = setTimeout(onContinue, 3500);
+        return () => clearTimeout(timer);
+    }, [onContinue]);
+
+    const bg = slide.theme === 'trap' ? 'bg-surgical' : slide.theme === 'logic' ? 'bg-cambridge' : slide.theme === 'success' ? 'bg-success' : 'bg-ink';
+
+    return (
+        <div className={`fixed inset-0 z-50 flex items-center justify-center ${bg} text-white cursor-pointer`} onClick={onContinue}>
+            <div className="text-center relative">
+                 <div className="absolute inset-0 bg-white opacity-20 blur-3xl rounded-full animate-pulse"></div>
+                 <div className="relative z-10">
+                     <Crosshair size={64} className="mx-auto mb-6 animate-spin-slow opacity-80" />
+                     <h2 className="text-4xl md:text-6xl font-black uppercase tracking-widest animate-glitch mb-2">Checkpoint</h2>
+                     <div className="h-1 w-24 bg-white mx-auto mb-4"></div>
+                     <p className="font-mono text-xl opacity-80 animate-bounce">{slide.lines[0]}</p>
+                 </div>
+            </div>
+        </div>
+    )
+}
+
 // 3. Immersive Player
 const ImmersivePlayer: React.FC<{ topic: StaticTopic, onClose: (completed: boolean) => void, isDark: boolean, lang: Language, setLang: (l: Language) => void }> = ({ topic, onClose, isDark, lang, setLang }) => {
   const [idx, setIdx] = useState(0);
   const slides = useMemo(() => generateJourney(topic), [topic]);
   const slide = slides[idx];
-  const [showTranslate, setShowTranslate] = useState(false); // Mobile toggle if needed
+  const [images, setImages] = useState<Record<string, string>>({});
+  const requestingRef = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    const currentSlide = slides[idx];
+    // Generate Visual Aid for 'Invisible Work' sections (Logic/Trap)
+    if ((currentSlide.theme === 'trap' || currentSlide.theme === 'logic') && !images[currentSlide.id] && !requestingRef.current.has(currentSlide.id) && currentSlide.type !== 'checkpoint') {
+        requestingRef.current.add(currentSlide.id);
+        const context = currentSlide.lines.join(' ');
+        
+        generateVisualAid(currentSlide.title || 'Concept', context, currentSlide.theme as 'trap' | 'logic')
+           .then(url => {
+               if (url) setImages(prev => ({...prev, [currentSlide.id]: url}));
+           })
+           .catch(() => {
+               requestingRef.current.delete(currentSlide.id); // Retry allowed later if user navigates back
+           });
+    }
+  }, [idx, slides, images]);
 
   const advance = () => {
     if (idx < slides.length - 1) {
@@ -240,17 +388,32 @@ const ImmersivePlayer: React.FC<{ topic: StaticTopic, onClose: (completed: boole
     neutral: 'bg-paper dark:bg-zinc-900',
     trap: 'bg-ink', 
     logic: 'bg-cambridge',
-    success: 'bg-success'
+    success: 'bg-success',
+    checkpoint: 'bg-ink'
   };
 
   const labels = UI_LABELS[lang];
 
+  if (slide.type === 'checkpoint') {
+      return <CheckpointSlide slide={slide} onContinue={advance} />
+  }
+
   return (
     <div className={`fixed inset-0 z-50 flex flex-col transition-colors duration-700 ${bgColors[slide.theme]}`}>
-      {/* HUD */}
-      <div className="absolute top-0 left-0 w-full h-1.5 bg-black/10 dark:bg-white/10 z-50">
-        <div className="h-full bg-surgical transition-all duration-500" style={{ width: `${((idx + 1) / slides.length) * 100}%` }} />
-      </div>
+      {/* Visual Aid Background Layer */}
+      {images[slide.id] && (
+         <div className="absolute inset-0 z-0 overflow-hidden">
+             <img 
+               src={images[slide.id]} 
+               alt="AI Visual Aid" 
+               className="w-full h-full object-cover animate-blur-in opacity-40 scale-105"
+             />
+             <div className={`absolute inset-0 ${slide.theme === 'trap' ? 'bg-gradient-to-t from-black via-black/80 to-transparent' : 'bg-gradient-to-t from-cambridge via-cambridge/80 to-transparent'}`}></div>
+         </div>
+      )}
+      
+      {/* HUD: Milestone Tracker */}
+      <MilestoneTracker currentMilestoneId={slide.milestoneId} lang={lang} topic={topic} />
 
       <div className="absolute top-6 right-6 z-50 flex gap-2">
          {/* Language Toggle in Player */}
@@ -272,7 +435,7 @@ const ImmersivePlayer: React.FC<{ topic: StaticTopic, onClose: (completed: boole
 
       {/* Main Stage */}
       <div 
-        className="flex-grow flex flex-col justify-center items-center p-6 md:p-12 cursor-pointer relative"
+        className="flex-grow flex flex-col justify-center items-center p-6 md:p-12 md:pl-24 cursor-pointer relative overflow-y-auto z-10"
         onClick={() => slide.type !== 'interactive' && advance()}
       >
          {/* Overline */}

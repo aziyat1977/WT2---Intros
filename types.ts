@@ -1,3 +1,4 @@
+
 export interface LogicMap {
   viewA: string;
   viewB: string;
@@ -8,6 +9,7 @@ export interface QuizQuestion {
   question: string;
   options: string[];
   answer: string;
+  explanation?: string;
 }
 
 export interface GapFill {
@@ -54,16 +56,23 @@ export interface StaticTopic extends SurgicalAnalysis {
 }
 
 // New Types for the Journey Engine
-export type SlideTheme = 'neutral' | 'trap' | 'logic' | 'success';
+export type SlideTheme = 'neutral' | 'trap' | 'logic' | 'success' | 'checkpoint';
+
+export interface Milestone {
+  id: string;
+  label: string; // e.g., "Briefing", "The Trap", "Logic Core"
+  icon?: string;
+}
 
 export interface Slide {
   id: string;
-  type: 'text' | 'interactive' | 'cover' | 'reward';
+  type: 'text' | 'interactive' | 'cover' | 'reward' | 'checkpoint';
   theme: SlideTheme;
   overline?: string;
   title?: string;
   lines: string[]; // Strictly 3 max for main visuals
   data?: any;
+  milestoneId: string; // Connects slide to a specific milestone
 }
 
 export interface UserProgress {

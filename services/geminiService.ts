@@ -74,3 +74,36 @@ export const analyzeWritingPrompt = async (prompt: string): Promise<SurgicalAnal
     throw error;
   }
 };
+
+export const generateVisualAid = async (concept: string, context: string, theme: 'trap' | 'logic'): Promise<string | null> => {
+  const modelId = "gemini-2.5-flash-image";
+  
+  const mood = theme === 'trap' ? 'Warning, Critical, Cautionary, Red' : 'Analytical, Structured, Clear, Blueprint, Deep Blue';
+  
+  const prompt = `Create a high-quality, abstract, minimalist illustration suitable for an academic learning app background.
+  Concept: ${concept}.
+  Context: ${context}.
+  Mood: ${mood}.
+  Style: Clean geometric shapes, soft lighting, 3D render or flat vector.
+  Composition: Central focus, uncluttered edges (to allow text overlay).
+  No text inside the image.`;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: modelId,
+      contents: {
+        parts: [{ text: prompt }],
+      },
+    });
+
+    for (const part of response.candidates?.[0]?.content?.parts || []) {
+      if (part.inlineData && part.inlineData.mimeType.startsWith('image')) {
+        return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+      }
+    }
+    return null;
+  } catch (error) {
+    console.error("Visual aid generation failed:", error);
+    return null;
+  }
+};

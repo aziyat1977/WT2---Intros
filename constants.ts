@@ -54,12 +54,14 @@ export const STATIC_TOPICS: StaticTopic[] = [
       logic: {
         question: "What is the specific function of the phrase \"While I accept that...\" in the Thesis Statement?",
         options: ["It introduces a concession.", "It states the main argument.", "It gives a specific example."],
-        answer: "It introduces a concession. It acknowledges the opposing view ('sensationalism is bad') before stating the writer's main opinion ('transparency is vital')."
+        answer: "It introduces a concession.",
+        explanation: "It acknowledges the opposing view ('sensationalism is bad') before stating the writer's main opinion ('transparency is vital')."
       },
       trap: {
         question: "Which argument below would be OFF-TOPIC for this specific prompt?",
         options: ["The media often spreads fake news for political reasons.", "Copycat behavior is a real psychological risk.", "Detailed reporting helps people prepare."],
-        answer: "\"The media often spreads fake news for political reasons.\" (This prompt is about VIOLENCE and FEAR, not political truth.)"
+        answer: "The media often spreads fake news for political reasons.",
+        explanation: "This prompt is about VIOLENCE and FEAR, not political truth."
       },
       gap: {
         textParts: [
@@ -153,12 +155,14 @@ export const STATIC_TOPICS: StaticTopic[] = [
       logic: {
         question: "Does the writer agree or disagree with high salaries?",
         options: ["A balanced view (Yes to higher pay, No to huge gap).", "Completely agrees with high salaries.", "Completely disagrees with high salaries."],
-        answer: "A balanced view. Agrees they deserve *higher* pay, but disagrees with the *extent* (the huge gap)."
+        answer: "A balanced view (Yes to higher pay, No to huge gap).",
+        explanation: "Agrees they deserve higher pay, but disagrees with the extent (the huge gap)."
       },
       trap: {
         question: "Why is writing \"CEOs are greedy and evil\" a Band 6.0 mistake?",
         options: ["It is emotional and generalized.", "It is too specific.", "It uses incorrect grammar."],
-        answer: "It is emotional and generalized. You must analyze the *economic justification*, not just judge the character of people."
+        answer: "It is emotional and generalized.",
+        explanation: "You must analyze the economic justification, not just judge the character of people."
       },
       gap: {
         textParts: [
@@ -194,12 +198,14 @@ export const STATIC_TOPICS: StaticTopic[] = [
       logic: {
         question: "What is the writer's \"Thesis Statement\" doing here?",
         options: ["It clearly outweighs the advantages.", "It says advantages and disadvantages are equal.", "It does not give an opinion."],
-        answer: "It clearly outweighs the advantages. It admits one benefit (relief) but states two major negatives (environment + agriculture)."
+        answer: "It clearly outweighs the advantages.",
+        explanation: "It admits one benefit (relief) but states two major negatives (environment + agriculture)."
       },
       trap: {
         question: "True or False: You should spend a paragraph describing different types of pollution (air, water, noise).",
         options: ["False. Focus on housing logic.", "True. Environmental essays need pollution lists."],
-        answer: "False. This is a housing essay. You only discuss pollution IF it results from building the new towns (e.g. commuting traffic)."
+        answer: "False. Focus on housing logic.",
+        explanation: "This is a housing essay. You only discuss pollution IF it results from building the new towns."
       },
       gap: {
         textParts: [
@@ -235,12 +241,14 @@ export const STATIC_TOPICS: StaticTopic[] = [
         logic: {
           question: "How many main ideas does the Thesis Statement promise to discuss?",
           options: ["Two: Economic impact & Artistic quality.", "One: Technology is bad.", "Three: Jobs, Money, and Computers."],
-          answer: "Two main ideas: 1. Economic impact (undermines livelihoods) and 2. Artistic quality (devoid of emotion)."
+          answer: "Two: Economic impact & Artistic quality.",
+          explanation: "1. Economic impact (undermines livelihoods) and 2. Artistic quality (devoid of emotion)."
         },
         trap: {
           question: "Which example is best to use in Body Paragraph 1?",
           options: ["Graphic designers losing jobs to tools like Midjourney.", "Robots building cars in factories.", "AI controlling nuclear weapons."],
-          answer: "\"Graphic designers losing jobs to tools like Midjourney.\" (This is relevant to Art/Livelihood. Do not talk about factory robots)."
+          answer: "Graphic designers losing jobs to tools like Midjourney.",
+          explanation: "This is relevant to Art/Livelihood. Do not talk about factory robots."
         },
         gap: {
           textParts: [
@@ -255,7 +263,7 @@ export const STATIC_TOPICS: StaticTopic[] = [
         vocab: {
           question: "Match the word \"Devoid\" to its definition.",
           options: ["Entirely lacking or free from.", "Full of something.", "To destroy completely."],
-          answer: "Entirely lacking or free from (usually used with 'of')."
+          answer: "Entirely lacking or free from."
         }
       }
   },
@@ -276,12 +284,14 @@ export const STATIC_TOPICS: StaticTopic[] = [
         logic: {
           question: "Who does the writer identify as the primary actors?",
           options: ["Governments (Rules) & Corporations (Money).", "Only Governments.", "Only Corporations."],
-          answer: "Governments (for rules) and Corporations (for money/cleanup). It is a dual-responsibility approach."
+          answer: "Governments (Rules) & Corporations (Money).",
+          explanation: "Governments (for rules) and Corporations (for money/cleanup). It is a dual-responsibility approach."
         },
         trap: {
           question: "Which sentence should you DELETE from your plan?",
           options: ["Space exploration is a waste of money that should be spent on Earth.", "Companies should pay because they profit.", "Governments control the laws."],
-          answer: "\"Space exploration is a waste of money that should be spent on Earth.\" (Off-topic. The prompt assumes space launches are happening; the question is about cleaning the debris.)"
+          answer: "Space exploration is a waste of money that should be spent on Earth.",
+          explanation: "Off-topic. The prompt assumes space launches are happening; the question is about cleaning the debris."
         },
         gap: {
           textParts: [
@@ -296,7 +306,7 @@ export const STATIC_TOPICS: StaticTopic[] = [
         vocab: {
           question: "Match the word \"Liability\" to its definition.",
           options: ["The state of being responsible by law.", "The ability to lie.", "A heavy weight."],
-          answer: "The state of being responsible for something, especially by law."
+          answer: "The state of being responsible by law."
         }
       }
   }
