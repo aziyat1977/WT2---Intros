@@ -1,5 +1,41 @@
 import { StaticTopic } from "./types";
 
+export const UI_LABELS = {
+  en: {
+    start: "Start Lesson",
+    module: "Module",
+    xp: "XP",
+    level: "Level",
+    tap: "Tap to advance",
+    correct: "Correct",
+    reveal: "Reveal Answers",
+    continue: "Continue Journey",
+    option: "Option"
+  },
+  ru: {
+    start: "Начать урок",
+    module: "Модуль",
+    xp: "Опыт",
+    level: "Уровень",
+    tap: "Нажмите для продолжения",
+    correct: "Верно",
+    reveal: "Показать ответы",
+    continue: "Продолжить",
+    option: "Вариант"
+  },
+  uz: {
+    start: "Darsni boshlash",
+    module: "Modul",
+    xp: "XP",
+    level: "Daraja",
+    tap: "Davom etish uchun bosing",
+    correct: "To'g'ri",
+    reveal: "Javoblarni ko'rsatish",
+    continue: "Davom etish",
+    option: "Variant"
+  }
+};
+
 export const STATIC_TOPICS: StaticTopic[] = [
   {
     id: 1,
@@ -39,6 +75,64 @@ export const STATIC_TOPICS: StaticTopic[] = [
         question: "Match the word \"Vicinity\" to its definition.",
         options: ["The area near or surrounding a particular place.", "A dangerous situation.", "A type of transparent material."],
         answer: "The area near or surrounding a particular place."
+      }
+    },
+    translations: {
+      ru: {
+        topicTitle: "СМИ и Цензура",
+        prompt: "Некоторые считают, что освещение насильственных преступлений следует ограничивать, чтобы предотвратить страх. Другие утверждают, что полная отчетность необходима для безопасности.",
+        theTrap: "Писать обобщенно о 'Фейковых новостях' или 'Коррупции'.",
+        specificQuestion: "Скрывать насилие, чтобы остановить страх? ИЛИ Показывать насилие ради безопасности?",
+        logicMap: {
+          viewA: "Слишком много деталей = Паника → Преступники-подражатели.",
+          viewB: "Осведомленность = Подготовка → Зная опасность, мы можем ее избежать.",
+          position: "Прозрачность важна, но кровавые детали не нужны."
+        },
+        lines: {
+          "The Invisible Work": "Невидимая Работа",
+          "2025 Edition": "Издание 2025",
+          "Analyze Prompt": "Анализ Темы",
+          "Most students write:": "Большинство пишут:",
+          "This limits you to Band 6.0.": "Это ограничивает вас баллом 6.0.",
+          "Stop writing.": "Перестаньте писать.",
+          "Start thinking.": "Начните думать.",
+          "Find the specific question.": "Найдите конкретный вопрос.",
+          "Specific Question": "Конкретный Вопрос",
+          "View A": "Мнение А",
+          "View B": "Мнение Б",
+          "My Position": "Моя Позиция",
+          "Surgical Introduction": "Хирургическое Введение",
+          "Thesis": "Тезис",
+          "Development": "Развитие"
+        }
+      },
+      uz: {
+        topicTitle: "OAV va Senzura",
+        prompt: "Ba'zilar zo'ravonlik jinoyatlarini yoritishni cheklash kerak deb hisoblaydilar. Boshqalar esa to'liq xabar berish xavfsizlik uchun zarur deb bahslashadilar.",
+        theTrap: "'Soxta yangiliklar' yoki 'Korruptsiya' haqida umumiy yozish.",
+        specificQuestion: "Qo'rquvni to'xtatish uchun zo'ravonlikni yashirish kerakmi? YOKI Xavfsizlik uchun ko'rsatish kerakmi?",
+        logicMap: {
+          viewA: "Juda ko'p tafsilot = Vahima → Jinoyatchilar taqlid qiladi.",
+          viewB: "Xabardorlik = Tayyorgarlik → Xavfni bilsak, undan qochishimiz mumkin.",
+          position: "Shaffoflik muhim, ammo qonli tafsilotlar kerak emas."
+        },
+        lines: {
+          "The Invisible Work": "Ko'rinmas Ish",
+          "2025 Edition": "2025 Nashri",
+          "Analyze Prompt": "Mavzuni Tahlil Qilish",
+          "Most students write:": "Ko'pchilik talabalar yozadi:",
+          "This limits you to Band 6.0.": "Bu sizni 6.0 ball bilan cheklaydi.",
+          "Stop writing.": "Yozishni to'xtating.",
+          "Start thinking.": "O'ylashni boshlang.",
+          "Find the specific question.": "Aniq savolni toping.",
+          "Specific Question": "Aniq Savol",
+          "View A": "A Qarash",
+          "View B": "B Qarash",
+          "My Position": "Mening Pozitsiyam",
+          "Surgical Introduction": "Jarrohlik Kirish",
+          "Thesis": "Tezis",
+          "Development": "Rivojlanish"
+        }
       }
     }
   },

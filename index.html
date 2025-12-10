@@ -3,43 +3,69 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>The Invisible Work | Masterclass</title>
+    <title>The Invisible Work | Journey</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,500&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <script>
       tailwind.config = {
+        darkMode: 'class',
         theme: {
           extend: {
             fontFamily: {
               serif: ['"Playfair Display"', 'serif'],
               sans: ['Inter', 'sans-serif'],
+              mono: ['"Space Mono"', 'monospace'],
             },
             colors: {
+              ink: '#0a0a0a',
+              paper: '#f2f0e9',
+              darkPaper: '#18181b', // Zinc 900
+              surgical: '#ff2a2a', // Neon Red
               cambridge: '#2d3e50',
-              surgical: '#e74c3c',
-              paper: '#fdfbf7', 
-              success: '#27ae60',
+              highlight: '#d4d4d8',
+              success: '#00cc66',
+            },
+            backgroundImage: {
+              'noise': "url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22 opacity=%220.05%22/%3E%3C/svg%3E')",
+              'grid': "linear-gradient(to right, #e5e5e5 1px, transparent 1px), linear-gradient(to bottom, #e5e5e5 1px, transparent 1px)",
+              'grid-dark': "linear-gradient(to right, #333 1px, transparent 1px), linear-gradient(to bottom, #333 1px, transparent 1px)"
             },
             animation: {
-              'fade-in-up': 'fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-              'fade-in': 'fadeIn 1s ease-in-out forwards',
-              'slide-in-right': 'slideInRight 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-              'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'enter-slide': 'enterSlide 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+              'stagger-text': 'staggerText 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+              'blur-in': 'blurInUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+              'float': 'float 6s ease-in-out infinite',
+              'shake': 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both',
+              'pop': 'pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
             },
             keyframes: {
-              fadeInUp: {
-                '0%': { opacity: '0', transform: 'translateY(40px)' },
+              enterSlide: {
+                '0%': { opacity: '0', transform: 'translateY(20px) scale(0.98)' },
+                '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
+              },
+              staggerText: {
+                '0%': { opacity: '0', transform: 'translateY(10px)' },
                 '100%': { opacity: '1', transform: 'translateY(0)' },
               },
-              fadeIn: {
-                '0%': { opacity: '0' },
-                '100%': { opacity: '1' },
+              blurInUp: {
+                '0%': { opacity: '0', transform: 'translateY(40px) scale(0.95)', filter: 'blur(10px)' },
+                '100%': { opacity: '1', transform: 'translateY(0) scale(1)', filter: 'blur(0)' },
               },
-              slideInRight: {
-                '0%': { transform: 'translateX(100%)', opacity: '0' },
-                '100%': { transform: 'translateX(0)', opacity: '1' },
+              float: {
+                '0%, 100%': { transform: 'translateY(0)' },
+                '50%': { transform: 'translateY(-10px)' },
+              },
+              shake: {
+                '10%, 90%': { transform: 'translate3d(-1px, 0, 0)' },
+                '20%, 80%': { transform: 'translate3d(2px, 0, 0)' },
+                '30%, 50%, 70%': { transform: 'translate3d(-4px, 0, 0)' },
+                '40%, 60%': { transform: 'translate3d(4px, 0, 0)' }
+              },
+              pop: {
+                '0%': { transform: 'scale(0.8)', opacity: '0' },
+                '100%': { transform: 'scale(1)', opacity: '1' }
               }
             }
           }
@@ -48,17 +74,28 @@
     </script>
     <style>
       body {
-        background-color: #fdfbf7;
+        background-color: #f2f0e9;
         overflow-x: hidden;
+        cursor: crosshair;
+        transition: background-color 0.5s ease;
       }
-      .slide-content {
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        padding: 2rem;
-        text-align: center;
+      body.dark {
+        background-color: #18181b;
+      }
+      /* Custom Scrollbar specifically hidden for "App" feel */
+      ::-webkit-scrollbar {
+        width: 0px;
+        background: transparent;
+      }
+      .noise-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 50;
+        background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.8%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22 opacity=%220.07%22/%3E%3C/svg%3E');
       }
     </style>
   <script type="importmap">
@@ -74,6 +111,7 @@
 </script>
 </head>
   <body>
+    <div class="noise-overlay"></div>
     <div id="root"></div>
   </body>
 </html>
